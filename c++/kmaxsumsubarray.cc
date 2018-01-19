@@ -8,22 +8,32 @@ using namespace std;
 // arr = {-2, -3, 4, -1, -2, 1, 5, -3}, k = 3
 // output = {7, 6, 5}
 
+// arr = {3 -4 9 -8 -4 12 1 -1 -3}, k = 3
+// output = {13, 12, 12}
+
+// arr = {5 6 -8 7 -9 2 -4 5}, k = 3
+// output = {11, 10, 7}
+
 vector<int> findKMaxSumSubarrayN2(vector<int> &arr, int K) {
     vector<int> maxhere(arr.size(), 0);
-    vector<int> heap, res;
+    vector<int> heap, res;  // vector heap should be replaced by minHeap
     heap.push_back(arr[0]);
 
+    // compute the subarray sum
     maxhere[0] = arr[0];
     for (int i=1; i<arr.size(); i++) {
         maxhere[i] = maxhere[i-1] + arr[i];
     }
 
+    // for all subarray sum computed insert into heap
+    // to find the maximum 'k' subarray sum
     for (int i=1; i<arr.size(); i++) {
         heap.push_back(maxhere[i]);
         for (int j=i-1; j>=0; j--) {
             heap.push_back(maxhere[i] - maxhere[j]);
         }
     }
+    // this can be removed if heap is a minHeap
     sort(heap.begin(), heap.end(), greater<int>());
     for (int i=0; i<K; i++) {
         res.push_back(heap[i]);
@@ -41,6 +51,17 @@ vector<int> findKMaxSumSubarray(vector<int> &arr, int K) {
         maxhere[i] = maxhere[i-1] + arr[i];
     }
 
+    arrMin.push_back(0);
+    /*
+     * res and arrMin visualized to hold O(K) elements
+     * res holds the max K subarray sum elements
+     * arrMin holds min K subarray elements
+     *
+     * algo works by computing prefix sum of arr
+     * and stores maximum K subarray sum in res 
+     * using minimum K subarray sum in arrMin in
+     * O(n*K*K)
+     */
     for (int i=0; i<arr.size(); i++) {
         if (res.size() >= K) {
             for (int j=0; j<arrMin.size(); j++) {
@@ -56,13 +77,13 @@ vector<int> findKMaxSumSubarray(vector<int> &arr, int K) {
                 }
             }
         } else {
-            for (int j=0; j<arrMin.size() && res.size() < K; j++) {
+            for (int j=0; j<arrMin.size(); j++) {
                 res.push_back(maxhere[i] - arrMin[j]);
             }
         }
-        if (arrMin.size() < K)
+        if (arrMin.size() < K) {
             arrMin.push_back(maxhere[i]);
-        else {
+        } else {
             int temp = INT_MIN, tempPos;
             for (int j=0; j<K; j++) {
                 if (arrMin[j] > temp) {
